@@ -1,19 +1,31 @@
 [[packages]]
-name = "pam_tacplus-debian"
-commit_id = "50c6fd7"
-scm_url = "https://github.com/kravietz/pam_tacplus-debian"
-build_cmd = "/bin/true"
+name = "libtacplus-map"
+commit_id = "fe47203"
+scm_url = "https://github.com/vyos/libtacplus-map.git"
+build_cmd = """
+export DEB_CFLAGS_APPEND='-Wno-address -Wno-stringop-truncation'
+dpkg-buildpackage -uc -us -tc -b -d
+"""
 
 [[packages]]
-name = "pam_tacplus"
-#commit_id = "4f91b0d" # This commit cannot build the package
-commit_id = "b839c44"
-scm_url = "https://github.com/kravietz/pam_tacplus"
-
-#build_cmd = "sudo mk-build-deps --install --tool 'apt-get --yes --no-install-recommends'; cd ..; ./build.sh"
+name = "libpam-tacplus"
+commit_id = "0d38f9b"
+scm_url = "https://github.com/vyos/libpam-tacplus.git"
 build_cmd = """
-cp -a ../pam_tacplus-debian debian
-rm -f debian/compat
-sudo mk-build-deps --install --tool 'apt-get --yes --no-install-recommends'
+export DEB_CFLAGS_APPEND='-Wno-address -Wno-stringop-truncation'
+dpkg -i ../libtacplus-map-dev_*.deb ../libtacplus-map1_*.deb
+dpkg-buildpackage -uc -us -tc -b -d
+"""
+
+[packages.dependencies]
+packages = ["libpam-dev"]
+
+[[packages]]
+name = "libnss-tacplus"
+commit_id = "049d284"
+scm_url = "https://github.com/vyos/libnss-tacplus.git"
+build_cmd = """
+export DEB_CFLAGS_APPEND='-Wno-address -Wno-stringop-truncation'
+dpkg -i ../libtac-dev_*.deb ../libtac2_*.deb ../libpam-tacplus-dev_*.deb ../libpam-tacplus_*.deb
 dpkg-buildpackage -uc -us -tc -b -d
 """

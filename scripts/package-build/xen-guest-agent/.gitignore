@@ -1,7 +1,0 @@
-xen-guest-agent/
-*.buildinfo
-*.build
-*.changes
-*.deb
-*.dsc
-

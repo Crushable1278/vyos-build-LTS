@@ -63,3 +63,39 @@ scm_url = "https://github.com/vyos/udp-broadcast-relay.git"
 name = "hvinfo"
 commit_id = "sagitta"
 scm_url = "https://github.com/vyos/hvinfo.git"
+
+[[packages]]
+name = "libnss-mapuser"
+commit_id = "sagitta"
+scm_url = "https://github.com/vyos/libnss-mapuser.git"
+
+[[packages]]
+name = "libpam-radius-auth"
+commit_id = "sagitta"
+scm_url = "https://github.com/vyos/libpam-radius-auth.git"
+
+[[packages]]
+name = "live-boot"
+commit_id = "sagitta"
+scm_url = "https://github.com/vyos/live-boot.git"
+
+[[packages]]
+name = "vyatta-cfg-system"
+commit_id = "sagitta"
+scm_url = "https://github.com/vyos/vyatta-cfg-system.git"
+
+[[packages]]
+name = "vyatta-op"
+commit_id = "sagitta"
+scm_url = "https://github.com/vyos/vyatta-op.git"
+
+[[packages]]
+name = "vyos-cloud-init"
+commit_id = "sagitta"
+scm_url = "https://github.com/vyos/vyos-cloud-init.git"
+build_cmd = "./packages/bddeb && rm -f cloud-init_all.deb cloud-init.dsc"
+
+[[packages]]
+name = "vyos-world"
+commit_id = "sagitta"
+scm_url = "https://github.com/vyos/vyos-world.git"

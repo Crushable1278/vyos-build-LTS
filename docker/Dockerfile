@@ -149,10 +149,6 @@ RUN eval $(opam env --root=/opt/opam --set-root) && opam install -y \
       fileutils \
       xml-light
 
-# Build VyConf which is required to build libvyosconfig
-RUN eval $(opam env --root=/opt/opam --set-root) && \
-    opam pin add vyos1x-config https://github.com/vyos/vyos1x-config.git#b7f104781 -y
-
 # Packages needed for libvyosconfig
 RUN apt-get update && apt-get install -y \
       quilt \

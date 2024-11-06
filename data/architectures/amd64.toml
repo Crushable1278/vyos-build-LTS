@@ -1,10 +1,4 @@
-additional_repositories = [
-  "deb [arch=amd64] https://packages.vyos.net/saltproject/debian/11/amd64/3005 bullseye main",
-  "deb https://repo.zabbix.com/zabbix/6.0/debian bookworm main"
-]
-
 kernel_flavor = "amd64-vyos"
-
 # Packages added to images for x86 by default
 packages = [
   "grub2",
@@ -16,3 +10,11 @@ packages = [
   "openvpn-dco",
   "telegraf"
 ]
+
+[additional_repositories.salt]
+  architecture = "amd64"
+  url = "https://packages.vyos.net/saltproject/debian/11/amd64/3005"
+  distribution = "bullseye"
+
+[additional_repositories.zabbix]
+  url = "https://repo.zabbix.com/zabbix/6.0/debian"

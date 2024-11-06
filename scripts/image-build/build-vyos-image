@@ -25,6 +25,7 @@ import copy
 import uuid
 import glob
 import json
+import base64
 import shutil
 import argparse
 import datetime
@@ -490,8 +491,9 @@ if __name__ == "__main__":
         ## Create live-build configuration files
 
         # Add the additional repositories to package lists
-        print("I: Setting up additional APT entries")
+        print("I: Setting up VyOS repository APT entries")
         vyos_repo_entry = "deb {vyos_mirror} {vyos_branch} main\n".format(**build_config)
+        vyos_repo_entry += "deb-src {vyos_mirror} {vyos_branch} main\n".format(**build_config)
 
         apt_file = defaults.VYOS_REPO_FILE
 
@@ -503,10 +505,36 @@ if __name__ == "__main__":
             f.write(vyos_repo_entry)
 
         # Add custom APT entries
+        print("I: Setting up additional APT entries")
         if build_config.get('additional_repositories', False):
-            build_config['custom_apt_entry'] += build_config['additional_repositories']
+            for r in build_config['additional_repositories']:
+                repo_data = build_config['additional_repositories'][r]
 
-        if build_config.get('custom_apt_entry', False):
+                url = repo_data.get('url', None)
+                arch = repo_data.get('architecture', None)
+                distro = repo_data.get('distribution', build_config['debian_distribution'])
+                components = repo_data.get('components', 'main')
+
+                if not url:
+                    print(f'E: repository {r} does not specify URL')
+                    sys.exit(1)
+
+                if arch:
+                    arch_string = f'[arch={arch}]'
+                else:
+                    arch_string = ''
+
+                entry = f'deb {arch_string} {url} {distro} {components}'
+                build_config['custom_apt_entry'].append(entry)
+
+                if not repo_data.get('no_source', False):
+                    src_entry = f'deb-src {url} {distro} {components}'
+                    build_config['custom_apt_entry'].append(src_entry)
+
+                if repo_data.get('key', None):
+                    build_config['custom_apt_keys'].append({'name': r, 'key': repo_data['key']})
+
+        if build_config.get('custom_apt_entry', []):
             custom_apt_file = defaults.CUSTOM_REPO_FILE
             entries = "\n".join(build_config['custom_apt_entry'])
             if debug:
@@ -517,11 +545,13 @@ if __name__ == "__main__":
                 f.write("\n")
 
         # Add custom APT keys
-        if has_nonempty_key(build_config, 'custom_apt_key'):
+        if has_nonempty_key(build_config, 'custom_apt_keys'):
             key_dir = defaults.ARCHIVES_DIR
-            for k in build_config['custom_apt_key']:
-                dst_name = '{0}.key.chroot'.format(os.path.basename(k))
-                shutil.copy(k, os.path.join(key_dir, dst_name))
+            for k in build_config['custom_apt_keys']:
+                dst_name = '{0}.key.chroot'.format(k['name'])
+                with open(os.path.join(key_dir, dst_name), 'bw') as f:
+                    key_data = base64.b64decode(k['key'])
+                    f.write(key_data)
 
         # Add custom packages
         if has_nonempty_key(build_config, 'packages'):

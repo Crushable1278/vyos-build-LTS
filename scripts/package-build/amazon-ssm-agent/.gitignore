@@ -1,0 +1,7 @@
+amazon-ssm-agent/
+*.buildinfo
+*.build
+*.changes
+*.deb
+*.dsc
+*.tar.gz

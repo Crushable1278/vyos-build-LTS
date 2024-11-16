@@ -23,6 +23,12 @@ jobs:
         with:
           base: ${{ github.ref_name }}
           filters: |
+            amazon-cloudwatch-agent:
+              - 'scripts/package-build/amazon-cloudwatch-agent/**'
+            amazon-ssm-agent:
+              - 'scripts/package-build/amazon-ssm-agent/**'
+            aws-gwlbtun:
+              - 'scripts/package-build/aws-gwlbtun/**'
             ddclient:
               - 'scripts/package-build/ddclient/**'
             dropbear:
@@ -31,12 +37,16 @@ jobs:
               - 'scripts/package-build/ethtool/**'
             frr:
               - 'scripts/package-build/frr/**'
+            frr_exporter:
+              - 'scripts/package-build/frr_exporter/**'
             hostap:
               - 'scripts/package-build/hostap/**'
             hsflowd:
               - 'scripts/package-build/hsflowd/**'
             isc-dhcp:
               - 'scripts/package-build/isc-dhcp/**'
+            kea:
+              - 'scripts/package-build/kea/**'
             keepalived:
               - 'scripts/package-build/keepalived/**'
             libpam-radius-auth:
@@ -50,6 +60,8 @@ jobs:
               - 'scripts/package-build/net-snmp/**'
             netfilter:
               - 'scripts/package-build/netfilter/**'
+            node_exporter:
+              - 'scripts/package-build/node_exporter/**'
             opennhrp:
               - 'scripts/package-build/opennhrp/**'
             openvpn-otp:
@@ -76,6 +88,8 @@ jobs:
               - 'scripts/package-build/waagent/**'
             wide-dhcpv6:
               - 'scripts/package-build/wide-dhcpv6/**'
+            xen-guest-agent:
+              - 'scripts/package-build/xen-guest-agent/**'
 
       - name: Trigger builds for changed packages
         run: |
@@ -93,6 +107,18 @@ jobs:
           }
 
           # Trigger builds based on detected changes
+          if [ "${{ steps.changes.outputs.amazon-cloudwatch-agent }}" == "true" ]; then
+            trigger_build "amazon-cloudwatch-agent"
+          fi
+
+          if [ "${{ steps.changes.outputs.amazon-ssm-agent }}" == "true" ]; then
+            trigger_build "amazon-ssm-agent"
+          fi
+
+          if [ "${{ steps.changes.outputs.aws-gwlbtun }}" == "true" ]; then
+            trigger_build "aws-gwlbtun"
+          fi
+
           if [ "${{ steps.changes.outputs.ddclient }}" == "true" ]; then
             trigger_build "ddclient"
           fi
@@ -109,6 +135,10 @@ jobs:
             trigger_build "frr"
           fi
 
+          if [ "${{ steps.changes.outputs.frr_exporter }}" == "true" ]; then
+            trigger_build "frr_exporter"
+          fi
+
           if [ "${{ steps.changes.outputs.hostap }}" == "true" ]; then
             trigger_build "hostap"
           fi
@@ -119,6 +149,10 @@ jobs:
 
           if [ "${{ steps.changes.outputs.isc-dhcp }}" == "true" ]; then
             trigger_build "isc-dhcp"
+          fi
+
+          if [ "${{ steps.changes.outputs.kea }}" == "true" ]; then
+            trigger_build "kea"
           fi
 
           if [ "${{ steps.changes.outputs.keepalived }}" == "true" ]; then
@@ -143,6 +177,10 @@ jobs:
 
           if [ "${{ steps.changes.outputs.netfilter }}" == "true" ]; then
             trigger_build "netfilter"
+          fi
+
+          if [ "${{ steps.changes.outputs.node_exporter }}" == "true" ]; then
+            trigger_build "node_exporter"
           fi
 
           if [ "${{ steps.changes.outputs.opennhrp }}" == "true" ]; then
@@ -196,3 +234,8 @@ jobs:
           if [ "${{ steps.changes.outputs.wide-dhcpv6 }}" == "true" ]; then
             trigger_build "wide-dhcpv6"
           fi
+
+          if [ "${{ steps.changes.outputs.xen-guest-agent }}" == "true" ]; then
+            trigger_build "xen-guest-agent"
+          fi
+

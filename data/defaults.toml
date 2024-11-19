@@ -7,14 +7,15 @@ debian_distribution = "bookworm"
 debian_mirror = "http://deb.debian.org/debian"
 debian_security_mirror = "http://deb.debian.org/debian-security"
 
-debian_archive_areas = "main contrib non-free"
+debian_archive_areas = "main contrib non-free non-free-firmware"
 
-vyos_mirror = "http://dev.packages.vyos.net/repositories/sagitta"
+vyos_mirror = "https://packages.vyos.net/repositories/sagitta"
 
 vyos_branch = "sagitta"
 release_train = "sagitta"
 
-kernel_version = "6.6.59"
+kernel_version = "6.6.62"
+kernel_flavor = "vyos"
 bootloaders = "syslinux,grub-efi"
 
 squashfs_compression_type = "xz -Xbcj x86 -b 256k -always-use-fragments -no-recovery"

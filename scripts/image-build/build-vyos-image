@@ -193,8 +193,9 @@ if __name__ == "__main__":
        'pbuilder-debian-mirror': ('Debian repository mirror for pbuilder env bootstrap', None),
        'vyos-mirror': ('VyOS package mirror', None),
        'build-type': ('Build type, release or development', lambda x: x in ['release', 'development']),
-       'version': ('Version number (release builds only)', None),
-       'build-comment': ('Optional build comment', None)
+       'version': ('Version string', None),
+       'build-comment': ('Optional build comment', None),
+       'build-hook-opts': ('Custom options for the post-build hook', None)
     }
 
     # Create the option parser
@@ -269,19 +270,11 @@ if __name__ == "__main__":
     if pre_build_config['pbuilder_debian_mirror'] is None:
         args['pbuilder_debian_mirror'] = pre_build_config['pbuilder_debian_mirror'] = pre_build_config['debian_mirror']
 
-    # Version can only be set for release builds,
-    # for dev builds it hardly makes any sense
-    if pre_build_config['build_type'] == 'development':
-        if args['version'] is not None:
-            print("E: Version can only be set for release builds")
-            print("Use --build-type=release option if you want to set version number")
-            sys.exit(1)
-
     # Validate characters in version name
-    if 'version' in args and args['version'] != None:
+    if args.get('version'):
         allowed = string.ascii_letters + string.digits + '.' + '-' + '+'
         if not set(args['version']) <= set(allowed):
-            print(f'Version contained illegal character(s), allowed: {allowed}')
+            print(f'Version string contains illegal character(s), allowed: {allowed}')
             sys.exit(1)
 
     ## Inject some useful hardcoded options
@@ -394,8 +387,10 @@ if __name__ == "__main__":
             build_git = ""
             git_branch = ""
 
-        # Create the build version string
-        if build_config['build_type'] == 'development':
+        # Create the build version string, if it's not explicitly given
+        if build_config.get('version'):
+            version = build_config['version']
+        else:
             try:
                 if not git_branch:
                     raise ValueError("git branch could not be determined")
@@ -410,9 +405,6 @@ if __name__ == "__main__":
             except Exception as e:
                 print("W: Could not build a version string specific to git branch, falling back to default: {0}".format(str(e)))
                 version = "999.{0}".format(build_timestamp)
-        else:
-            # Release build, use the version from ./configure arguments
-            version = build_config['version']
 
         if build_config['build_type'] == 'development':
             lts_build = False
@@ -663,26 +655,55 @@ Pin-Priority: 600
     # Build additional flavors from the ISO,
     # if the flavor calls for them
     if build_config["image_format"] != ["iso"]:
-        raw_image = raw_image.create_raw_image(build_config, iso_file, "tmp/")
+        # For all non-iso formats, we always build a raw image first
+        version_data, raw_image = raw_image.create_raw_image(build_config, iso_file, "tmp/")
         manifest['artifacts'].append(raw_image)
 
-        if has_nonempty_key(build_config, "post_build_hook"):
-            # Some flavors require special procedures that aren't covered by qemu-img
-            # (most notably, the VMware OVA that requires a custom tool to make and sign the image).
-            # For those cases, we support running a post-build hook on the raw image.
-            # The image_format field should be 'raw' if a post-build hook is used.
-            hook_path = build_config["post_build_hook"]
-            cmd(f"{hook_path} {raw_image}")
-        else:
-            # Most other formats, thankfully, can be produced with just `qemu-img convert`
-            other_formats = filter(lambda x: x not in ["iso", "raw"], build_config["image_format"])
-            for f in other_formats:
-                image_ext = build_config.get("image_ext", f)
-                image_opts = build_config.get("image_opts", "")
-                target = f"{os.path.splitext(raw_image)[0]}.{image_ext}"
-                print(f"I: Building {f} file {target}")
-                cmd(f"qemu-img convert -f raw -O {f} {image_opts} {raw_image} {target}")
-                manifest['artifacts'].append(target)
+        # If there are other formats in the flavor, the assumptions is that
+        # they can be produced from a raw image with `qemu-img convert`
+        other_formats = filter(lambda x: x not in ["iso", "raw"], build_config["image_format"])
+        for f in other_formats:
+            image_ext = build_config.get("image_ext", f)
+            image_opts = build_config.get("image_opts", "")
+            target = f"{os.path.splitext(raw_image)[0]}.{image_ext}"
+            print(f"I: Building {f} file {target}")
+            cmd(f"qemu-img convert -f raw -O {f} {image_opts} {raw_image} {target}")
+            manifest['artifacts'].append(target)
+
+        # Finally, there are formats that require special procedures.
+        # For example, a VMware OVA needs a custom tool for image building and signing.
+        # For those cases, we support custom build hooks that run on raw images.
+        # A post-build hook is a script embedded in the flavor file
+        # that must return the artifact name via stdout.
+        if has_nonempty_key(build_config, "build_hook"):
+            hook_source = build_config["build_hook"]
+
+            with open('build_hook', 'w') as f:
+                f.write(hook_source)
+            os.chmod('build_hook', 0o755)
+
+            if has_nonempty_key(build_config, "build_hook_opts"):
+                hook_opts = build_config["build_hook_opts"]
+            else:
+                hook_opts = ""
+            build_hook_command = f"./build_hook {raw_image} {version_data['version']} \
+              {build_config['architecture']} {hook_opts}"
+            print(f'I: executing build hook command: {build_hook_command}')
+            custom_image = rc_cmd(build_hook_command)
+            manifest['artifacts'].append(custom_image)
+
+    # Filter out unwanted files from the artifact list
+    # and leave only those the user specified
+    # in either `artifact_format` or `image_format`.
+    #
+    # For example, with `image_format = "raw"`,
+    # the ISO image is just an intermediate object, not an target artifact.
+
+    # os.path.splitext returns extensions with dots,
+    # so we need to remove the dots, hence [1:]
+    is_artifact = lambda f: os.path.splitext(f)[-1][1:] in build_config['artifact_format']
+
+    manifest['artifacts'] = list(filter(is_artifact, manifest['artifacts']))
 
     with open('manifest.json', 'w') as f:
         f.write(json.dumps(manifest))

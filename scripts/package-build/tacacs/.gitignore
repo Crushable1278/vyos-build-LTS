@@ -6,3 +6,4 @@ libtacplus-map/
 *.changes
 *.deb
 *.dsc
+*.tar.gz

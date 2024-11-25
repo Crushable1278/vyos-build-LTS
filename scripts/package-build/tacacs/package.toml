@@ -16,7 +16,7 @@ commit_id = "master"
 scm_url = "https://github.com/vyos/libnss-tacplus.git"
 build_cmd = "sudo dpkg -i ../libtac*.deb ../libpam-tacplus*.deb; dpkg-buildpackage -us -uc -tc -b"
 
-[packages.dependencies]
+[dependencies]
 packages = [
     "libpam-dev",
     "autoconf-archive",

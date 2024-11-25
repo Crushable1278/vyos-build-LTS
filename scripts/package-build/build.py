@@ -176,7 +176,6 @@ if __name__ == '__main__':
     # Load global dependencies
     global_dependencies = config.get('dependencies', {}).get('packages', [])
     if global_dependencies:
-        print(global_dependencies)
         ensure_dependencies(global_dependencies)
 
     for package in packages:

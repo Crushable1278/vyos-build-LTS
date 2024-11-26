@@ -6,7 +6,7 @@ image_format = "iso"
 packages = [
   # QEMU and Xen guest tools exist for multiple architectures
   "qemu-guest-agent",
-  "vyos-xe-guest-utilities",
+  "xen-guest-agent"
 ]
 
 [architectures.amd64]

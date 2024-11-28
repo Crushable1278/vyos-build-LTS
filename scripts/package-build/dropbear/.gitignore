@@ -4,4 +4,4 @@ dropbear/
 *.changes
 *.deb
 *.dsc
-
+*.tar.gz

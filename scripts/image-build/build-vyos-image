@@ -261,14 +261,18 @@ if __name__ == "__main__":
     pre_build_config = merge_defaults(args, defaults=pre_build_config, skip_none=True)
 
     # Some fixup for mirror settings.
-    # The idea is: if --debian-mirror is specified but --pbuilder-debian-mirror is not,
-    # use the --debian-mirror value for both lb and pbuilder bootstrap
-    if pre_build_config['debian_mirror'] is None or pre_build_config['debian_security_mirror'] is None:
-        print("E: debian_mirror and debian_security_mirror cannot be empty")
+    # The idea is: if --debian-mirror is specified
+    # but --pbuilder-debian-mirror or --debian-security-mirror are not,
+    # use the --debian-mirror value for those
+    if pre_build_config['debian_mirror'] is None:
+        print("E: debian_mirror must be specified")
         sys.exit(1)
 
     if pre_build_config['pbuilder_debian_mirror'] is None:
-        args['pbuilder_debian_mirror'] = pre_build_config['pbuilder_debian_mirror'] = pre_build_config['debian_mirror']
+        pre_build_config['pbuilder_debian_mirror'] = pre_build_config['debian_mirror']
+
+    if pre_build_config['debian_security_mirror'] is None:
+        pre_build_config['debian_security_mirror'] = pre_build_config['debian_mirror']
 
     # Validate characters in version name
     if args.get('version'):
@@ -299,6 +303,11 @@ if __name__ == "__main__":
     ## Override with flavor and then CLI arguments
     build_config = merge_defaults(flavor_config, defaults=build_config)
     build_config = merge_defaults(args, defaults=build_config, skip_none=True)
+
+    # If Debian mirror is specified explicitly but Debian security mirror is not,
+    # assume that the user wants to use that mirror for security updates as well.
+    if (args['debian_mirror'] is not None) and (args['debian_security_mirror'] is None):
+        build_config['debian_security_mirror'] = args['debian_mirror']
 
     ## Rename and merge some fields for simplicity
     ## E.g. --custom-packages is for the user, but internally

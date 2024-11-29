@@ -195,7 +195,8 @@ if __name__ == "__main__":
        'build-type': ('Build type, release or development', lambda x: x in ['release', 'development']),
        'version': ('Version string', None),
        'build-comment': ('Optional build comment', None),
-       'build-hook-opts': ('Custom options for the post-build hook', None)
+       'build-hook-opts': ('Custom options for the post-build hook', None),
+       'bootloaders': ('Bootloaders to include in the image', None)
     }
 
     # Create the option parser
@@ -328,6 +329,10 @@ if __name__ == "__main__":
     if not has_nonempty_key(build_config, "image_format"):
         print("E: image format is not specified in the build flavor file")
         sys.exit(1)
+
+    ## Override bootloaders if specified
+    if args['bootloaders'] is not None:
+        build_config['bootloaders'] = args['bootloaders']
 
     ## Add default boot settings if needed
     if "boot_settings" not in build_config:

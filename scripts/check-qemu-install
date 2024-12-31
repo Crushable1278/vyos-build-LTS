@@ -401,6 +401,10 @@ try:
     c.expect('kvm')
     c.expect(op_mode_prompt)
 
+    # Inform smoketest about this environment
+    c.sendline('touch /tmp/vyos.smoketests.hint')
+    c.expect(op_mode_prompt)
+
     #################################################
     # Executing test-suite
     #################################################

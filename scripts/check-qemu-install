@@ -51,6 +51,17 @@ from datetime import datetime
 EXCEPTION = 0
 now = datetime.now()
 
+qemu_name = 'VyOS-QEMU'
+
+# getch.py
+KEY_F2 = chr(27) + chr(91) + chr(49) + chr(50) + chr(126)
+KEY_F10 = chr(27) + chr(91) + chr(50) + chr(49) + chr(126)
+KEY_DOWN = chr(27) + chr(91) + chr(66)
+KEY_SPACE = chr(32)
+KEY_RETURN = chr(13)
+KEY_ESC = chr(27)
+KEY_Y = chr(121)
+
 parser = argparse.ArgumentParser(description='Install and start a test VyOS vm.')
 parser.add_argument('iso', help='ISO file to install')
 parser.add_argument('disk', help='name of disk image file', nargs='?',
@@ -283,8 +294,10 @@ try:
     default_password = 'vyos'
 
     try:
-        c.expect('Automatic boot in', timeout=10)
-        c.sendline('')
+        c.expect('Welcome to GRUB', timeout=10)
+        c.send(KEY_DOWN)
+        c.send(KEY_DOWN)
+        c.send(KEY_RETURN)
     except pexpect.TIMEOUT:
         log.warning('Did not find GRUB countdown window, ignoring')
 

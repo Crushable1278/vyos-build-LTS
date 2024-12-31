@@ -105,13 +105,6 @@ class StreamToLogger(object):
     def flush(self):
         pass
 
-def get_half_cpus():
-    """ return 1/2 of the numbers of available CPUs """
-    cpu = os.cpu_count()
-    if cpu > 1:
-        cpu /= 2
-    return int(cpu)
-
 def get_qemu_cmd(name, enable_kvm, enable_uefi, disk_img, raid=None, iso_img=None):
     kvm = "-enable-kvm"
     cpu = "-cpu host"
@@ -137,13 +130,10 @@ def get_qemu_cmd(name, enable_kvm, enable_uefi, disk_img, raid=None, iso_img=Non
         # Set regular harddisk bootindex to 2 as we boot from a CDROM drive
         bootindex = '2'
 
-    # test using half of the available CPUs on the system
-    cpucount = get_half_cpus()
-
-    macbase = '52:54:00:00:00'
+    macbase = '02:00:00:00:00'
     cmd = f'qemu-system-x86_64 \
         -name "{name}" \
-        -smp {cpucount},sockets=1,cores={cpucount},threads=1 \
+        -smp 2,sockets=1,cores=2,threads=1 \
         -cpu host \
         {uefi} \
         -m 4G \

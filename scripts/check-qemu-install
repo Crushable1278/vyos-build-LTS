@@ -141,7 +141,8 @@ def get_qemu_cmd(name, enable_kvm, enable_uefi, disk_img, raid=None, iso_img=Non
         # Set regular harddisk bootindex to 2 as we boot from a CDROM drive
         bootindex = '2'
 
-    macbase = '02:00:00:00:00'
+    # RFC7042 section 2.1.2 MAC addresses used for documentation
+    macbase = '00:00:5E:00:53'
     cmd = f'qemu-system-x86_64 \
         -name "{name}" \
         -smp 2,sockets=1,cores=2,threads=1 \

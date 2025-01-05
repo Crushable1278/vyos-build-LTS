@@ -445,19 +445,18 @@ if __name__ == "__main__":
 
         # Multi line strings needs to be un-indented to not have leading
         # whitespaces in the resulting file
-        os_release = f"""
-    PRETTY_NAME="VyOS {version} ({build_config['release_train']})"
-    NAME="VyOS"
-    VERSION_ID="{version}"
-    VERSION="{version} ({build_config['release_train']})"
-    VERSION_CODENAME={build_defaults['debian_distribution']}
-    ID=vyos
-    BUILD_ID="{build_git}"
-    HOME_URL="{build_defaults['website_url']}"
-    SUPPORT_URL="{build_defaults['support_url']}"
-    BUG_REPORT_URL="{build_defaults['bugtracker_url']}"
-    DOCUMENTATION_URL="{build_config['documentation_url']}"
-        """
+        os_release = f"""PRETTY_NAME="VyOS {version} ({build_config['release_train']})"
+NAME="VyOS"
+VERSION_ID="{version}"
+VERSION="{version} ({build_config['release_train']})"
+VERSION_CODENAME={build_defaults['release_train']}
+ID=vyos
+BUILD_ID="{build_git}"
+HOME_URL="{build_defaults['website_url']}"
+SUPPORT_URL="{build_defaults['support_url']}"
+BUG_REPORT_URL="{build_defaults['bugtracker_url']}"
+DOCUMENTATION_URL="{build_config['documentation_url']}"
+"""
 
         # Reminder: all paths relative to the build dir, not to the repository root
         chroot_includes_dir = defaults.CHROOT_INCLUDES_DIR

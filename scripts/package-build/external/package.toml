@@ -70,11 +70,6 @@ commit_id = "sagitta"
 scm_url = "https://github.com/vyos/libnss-mapuser.git"
 
 [[packages]]
-name = "libpam-radius-auth"
-commit_id = "sagitta"
-scm_url = "https://github.com/vyos/libpam-radius-auth.git"
-
-[[packages]]
 name = "live-boot"
 commit_id = "sagitta"
 scm_url = "https://github.com/vyos/live-boot.git"

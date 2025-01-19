@@ -22,6 +22,7 @@ packages = [
     "gawk",
     "install-info",
     "libcap-dev",
+    "libc-ares-dev",
     "libjson-c-dev",
     "librtr-dev",
     "libpam-dev",
